@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>🎁 Überraschung</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, Arial;
+            background: linear-gradient(135deg, #f6f6f6, #e9e9e9);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            height: 100vh;
+            position: relative;
+        }
+
+        .progress {
+            height: 6px;
+            background: #ddd;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 12%;
+            background: #4caf50;
+            transition: width .6s ease;
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+
+            opacity: 0;
+            transform: translateY(18px) scale(0.99);
+            pointer-events: none;
+
+            transition: opacity .45s ease, transform .45s ease;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        /* optional: leichter Blur für mehr „Premium“-Feeling */
+        .page.transition-out {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background: white;
+            border-radius: 20px;
+            padding: 26px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        p {
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-size: 17px;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #4caf50;
+            color: white;
+        }
+
+        .winter {
+            background: #aed4f3;
+        }
+
+        .summer {
+            background: #ffd54f;
+        }
+
+        .spring {
+            background: #b2fd86c5;
+        }
+
+        .fall {
+            background: #fd6f1d;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 14px;
+            margin: 14px 0;
+        }
+
+        .big {
+            font-size: 64px;
+            text-align: center;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="confetti"></canvas>
+
+    <div class="app">
+
+        <div class="progress">
+            <div class="progress-bar" id="bar"></div>
+        </div>
+
+        <!-- 1 LOGIN -->
+        <div class="page active" id="p1">
+            <div class="card">
+                <h1>🎁 Geburtstagsgeschenk</h1>
+                <p>Kennwort eingeben</p>
+
+                <input type="password" id="pw">
+                <button class="primary" onclick="check()">Weiter</button>
+            </div>
+        </div>
+
+        <!-- 2 SPANNUNG -->
+        <div class="page" id="p2">
+            <div class="card">
+                <div class="big">🎉</div>
+                <h1>Herzlichen Glückwunsch zum Geburtstag!</h1>
+                <p>Zu deinem 60. kriegst du etwas besonderes ...</p>
+
+                <button class="primary" onclick="go('p3', 20)">Weiter</button>
+            </div>
+        </div>
+
+        <!-- 3 REVEAL -->
+        <div class="page" id="p3">
+            <div class="card">
+                <h1>🚂 Dein Erlebnis beginnt</h1>
+                <p>Ein besonderes Abenteuer ist für dich geplant.</p>
+
+                <button class="primary" onclick="go('p4', 35)">Details ansehen</button>
+            </div>
+        </div>
+
+        <!-- 4 ZUG -->
+        <div class="page" id="p4">
+            <div class="card">
+                <h1>🚂 Der Glacier Express</h1>
+                <p>Du fährst von Zermatt nach St. Moritz.</p>
+
+                <img src="zug.jpg">
+
+                <button class="primary" onclick="go('p5', 55)">Weiter zum Hotel</button>
+            </div>
+        </div>
+
+        <!-- 5 HOTEL -->
+        <div class="page" id="p5">
+            <div class="card">
+                <h1>Inklusive Übernachtung im Hotel</h1>
+                <p>Damit du entspannt reisen kannst, ist eine Übernachtung inklusive.</p>
+
+                <img src="hotel1.avif">
+
+                <button class="primary" onclick="go('p6', 75)">Termin wählen</button>
+            </div>
+        </div>
+
+        <!-- 6 AUSWAHL -->
+        <div class="page" id="p6">
+            <div class="card">
+                <h1>📅 Wann möchtest du reisen?</h1>
+
+                <button class="spring" onclick="submit('Fruehling')">🌷 Frühling</button>
+                <button class="summer" onclick="submit('Sommer')">☀️ Sommer</button>
+                <button class="fall" onclick="submit('Herbst')">🍂 Herbst</button>
+                <button class="winter" onclick="submit('Winter')">❄️ Winter</button>
+            </div>
+        </div>
+
+        <!-- 7 BESTÄTIGUNG -->
+        <div class="page" id="p7">
+            <div class="card">
+                <div class="big">❤️</div>
+                <h1>Perfekt!</h1>
+                <p>Deine Auswahl wurde gespeichert.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        const PASS = "Märklin06250130";
+        const FORM = "https://formspree.io/f/xjgdqabl";
+
+        function setBar(v) {
+            document.getElementById("bar").style.width = v + "%";
+        }
+
+        function show(id) {
+
+            const current = document.querySelector(".page.active");
+            const next = document.getElementById(id);
+
+            if (current === next) return;
+
+            // OUT animation
+            if (current) {
+                current.classList.add("transition-out");
+
+                setTimeout(() => {
+                    current.classList.remove("active", "transition-out");
+                }, 350);
+            }
+
+            // IN animation (leicht verzögert für smoother feel)
+            setTimeout(() => {
+                next.classList.add("active");
+            }, current ? 180 : 0);
+        }
+
+        function go(id, progress) {
+            show(id);
+            setTimeout(() => {
+                document.getElementById("bar").style.width = progress + "%";
+            }, 200);
+        }
+
+        /* LOGIN */
+        function check() {
+            if (document.getElementById("pw").value === PASS) {
+                go("p2", 15);
+                burst();
+            }
+        }
+
+        /* FORM */
+        async function submit(choice) {
+
+            try {
+                await fetch(FORM, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        Zeitraum: choice,
+                        Zeitpunkt: new Date().toLocaleString("de-DE")
+                    })
+                });
+            } catch (e) { console.log(e); }
+
+            go("p7", 100);
+            burst();
+        }
+
+        /* CONFETTI */
+        const c = document.getElementById("confetti");
+        const ctx = c.getContext("2d");
+
+        c.width = innerWidth;
+        c.height = innerHeight;
+
+        let parts = [];
+
+        function burst() {
+            parts = [];
+
+            for (let i = 0; i < 140; i++) {
+                parts.push({
+                    x: Math.random() * c.width,
+                    y: Math.random() * c.height - c.height,
+                    r: Math.random() * 6 + 3,
+                    d: Math.random() * 100,
+                    color: `hsl(${Math.random() * 360},80%,60%)`
+                });
+            }
+
+            animate();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            parts.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                p.y += 3 + p.d * 0.02;
+                p.x += Math.sin(p.d) * 0.5;
+            });
+        }
+
+        function animate() {
+            draw();
+            if (parts.length) requestAnimationFrame(animate);
+        }
+
+        window.onresize = () => {
+            c.width = innerWidth;
+            c.height = innerHeight;
+        };
+
+    </script>
+
+</body>
+
+</html>
